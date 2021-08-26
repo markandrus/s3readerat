@@ -11,7 +11,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	seekings3 "mrkrbrts.com/seekings3"
+	s3readerat "github.com/markandrus/s3readerat"
 )
 
 var debug = flag.Bool("debug", false, "enable verbose output")
@@ -48,24 +48,30 @@ func main() {
 
 	client := s3.NewFromConfig(cfg)
 
-	reader := seekings3.New(client, bucket, key)
+	reader, err := s3readerat.New(client, bucket, key)
+	if err != nil {
+		log.Fatalf("Unable to create ReaderAt instance: %v", err)
+	}
 	reader.Debug = *debug
 
-	_, err = reader.Seek(*offset, *whence)
+	size, err := reader.Size()
 	if err != nil {
-		log.Fatalf("Failed to seek to (offset=%d, whence=%d): %v", *offset, *whence, err)
+		log.Fatalf("Unable to get size of S3 object: %v", err)
 	}
 
-	var bytes int64
+	sectionReader := io.NewSectionReader(reader, 0, size)
+	_, err = sectionReader.Seek(*offset, *whence)
+	if err != nil {
+		log.Fatalf("Unable to seek S3 object: %v", err)
+	}
+
 	if *limit == -1 {
-		bytes, err = io.Copy(os.Stdout, reader)
+		_, err = io.Copy(os.Stdout, sectionReader)
 	} else {
-		bytes, err = io.CopyN(os.Stdout, reader, *limit)
+		_, err = io.CopyN(os.Stdout, sectionReader, *limit)
 	}
 
 	if err != nil && err != io.EOF {
 		log.Fatalf("Failed to read S3 object: %v", err)
 	}
-
-	log.Printf("Read %d bytes from S3 object\n", bytes)
 }
