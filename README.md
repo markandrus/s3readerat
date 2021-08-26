@@ -34,4 +34,4 @@ $ ./seek-s3 -offset -4 -whence 2 -limit 4 s3://$BUCKET/$KEY | xxd
 ```
 
 [seekinghttp]: https://github.com/jeffallen/seekinghttp
-[httpreadat]: https://github.com/snabb/httpreaderat
+[httpreaderat]: https://github.com/snabb/httpreaderat
