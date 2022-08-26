@@ -153,7 +153,7 @@ func (ra *S3ReaderAt) ReadAt(p []byte, off int64) (n int, err error) {
 
 	if (err == nil || err == io.EOF) && int64(n) != resp.ContentLength {
 		if ra.Debug {
-			log.Printf("We read %d bytes, but the content-length was %d", n, resp.ContentLength)
+			log.Printf("We read %d bytes, but the content-length was %d\n", n, resp.ContentLength)
 		}
 	}
 
