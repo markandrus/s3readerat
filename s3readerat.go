@@ -229,7 +229,7 @@ func (ra *S3ReaderAt) s3ClientInRegion(region string) *s3.Client {
 	}
 
 	// Multi-region mode. Need a new s3.Client.
-	options := *ra.options
+	options := (*ra.options).Copy()
 	options.Region = region
 	return s3.New(options)
 }
