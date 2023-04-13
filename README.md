@@ -33,5 +33,16 @@ $ ./seek-s3 -offset -4 -whence 2 -limit 4 s3://$BUCKET/$KEY | xxd
 00000000: 5041 5231                                PAR1
 ```
 
+### Single- and multi-region modes
+
+If you call `NewWithOptions` passing an `s3.Client`, then the `S3ReaderAt` will
+be in "single-region" mode. What that means is that, if the S3 bucket you are
+trying to access is in another region, you may fail with a 3xx response from S3.
+
+If you call `NewWithOptions` passing `s3.Options`, then the `S3ReaderAt` will be
+in "multi-region" mode. What that means is that, if the S3 bucket you are trying
+to access is in another region, the `S3ReaderAt` will construct an `s3.Client`
+for you in the appropriate region, thereby avoiding the 3xx response from S3.
+
 [seekinghttp]: https://github.com/jeffallen/seekinghttp
 [httpreaderat]: https://github.com/snabb/httpreaderat
