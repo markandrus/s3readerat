@@ -46,9 +46,20 @@ func main() {
 		log.Fatalf("Unable to load AWS config: %v", err)
 	}
 
-	client := s3.NewFromConfig(cfg)
+	opts := s3.Options{
+		Region:        cfg.Region,
+		HTTPClient:    cfg.HTTPClient,
+		Credentials:   cfg.Credentials,
+		APIOptions:    cfg.APIOptions,
+		Logger:        cfg.Logger,
+		ClientLogMode: cfg.ClientLogMode,
+	}
 
-	reader, err := s3readerat.New(client, bucket, key)
+	reader, err := s3readerat.NewWithOptions(s3readerat.Options{
+		Options: &opts,
+		Bucket:  bucket,
+		Key:     key,
+	})
 	if err != nil {
 		log.Fatalf("Unable to create ReaderAt instance: %v", err)
 	}
