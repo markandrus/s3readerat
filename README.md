@@ -2,7 +2,7 @@ s3readerat
 ==========
 
 An implementation of `io.ReaderAt` that works using S3 GetObject and Range.
-Inspired by [seekinghttp][seekinghttp] and [httpreadat][httpreaderat].
+Inspired by [seekinghttp][seekinghttp] and [httpreaderat][httpreaderat].
 
 Example
 -------
