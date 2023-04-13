@@ -4,9 +4,10 @@ package s3readerat
 import (
 	"context"
 	"fmt"
-	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
 	"io"
 	"log"
+
+	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"

@@ -1,10 +1,11 @@
 package s3readerat
 
 import (
-	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
-	"github.com/pkg/errors"
 	"os"
 	"testing"
+
+	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
+	"github.com/pkg/errors"
 
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
