@@ -78,7 +78,9 @@ func NewWithSize(client *s3.Client, bucket string, key string, size int64) (*S3R
 func NewWithOptions(options Options) (*S3ReaderAt, error) {
 	if options.Client == nil && options.Options == nil {
 		return nil, errors.New("one of Client or Options is required")
-	} else if options.Client != nil && options.Options != nil {
+	}
+
+	if options.Client != nil && options.Options != nil {
 		return nil, errors.New("only one of Client or Options can be provided")
 	} else if options.Size != nil && *options.Size < 0 {
 		return nil, errors.Errorf("provided size is invalid: %d", *options.Size)
@@ -88,7 +90,7 @@ func NewWithOptions(options Options) (*S3ReaderAt, error) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	
+
 	ra := &S3ReaderAt{
 		Debug:   options.Debug,
 		ctx:     ctx,
@@ -97,7 +99,7 @@ func NewWithOptions(options Options) (*S3ReaderAt, error) {
 		bucket:  options.Bucket,
 		key:     options.Key,
 	}
-	
+
 	if options.Size != nil {
 		ra.size = *options.Size
 	} else {
