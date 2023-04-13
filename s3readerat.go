@@ -23,35 +23,51 @@ type S3ReaderAt struct {
 	size   int64
 }
 
+type Options struct {
+	Debug  bool
+	Client *s3.Client
+	Bucket string
+	Key    string
+	Size   *int64
+}
+
 var _ io.ReaderAt = (*S3ReaderAt)(nil)
 
 // New creates a new S3ReaderAt.
-func New(client *s3.Client, bucket string, key string) (ra *S3ReaderAt, err error) {
-	if client == nil {
-		return nil, errors.New("S3 client is required")
-	}
-	ra = &S3ReaderAt{
-		client: client,
-		bucket: bucket,
-		key:    key,
-	}
-	ra.size = -1
-	return ra, nil
+func New(client *s3.Client, bucket string, key string) (*S3ReaderAt, error) {
+	return NewWithOptions(Options{
+		Client: client,
+		Bucket: bucket,
+		Key:    key,
+	})
 }
 
 // NewWithSize creates a new S3ReaderAt that skips checking the S3 object's size.
-func NewWithSize(client *s3.Client, bucket string, key string, size int64) (ra *S3ReaderAt, err error) {
-	if client == nil {
+func NewWithSize(client *s3.Client, bucket string, key string, size int64) (*S3ReaderAt, error) {
+	return NewWithOptions(Options{
+		Client: client,
+		Bucket: bucket,
+		Key:    key,
+		Size:   &size,
+	})
+}
+
+func NewWithOptions(options Options) (*S3ReaderAt, error) {
+	if options.Client == nil {
 		return nil, errors.New("S3 client is required")
-	} else if size < 0 {
-		return nil, errors.Errorf("Provided size is invalid: %d", size)
+	} else if options.Size != nil && *options.Size < 0 {
+		return nil, errors.Errorf("Provided size is invalid: %d", *options.Size)
 	}
-	ra = &S3ReaderAt{
-		client: client,
-		bucket: bucket,
-		key:    key,
+	ra := &S3ReaderAt{
+		client: options.Client,
+		bucket: options.Bucket,
+		key:    options.Key,
 	}
-	ra.size = size
+	if options.Size != nil {
+		ra.size = *options.Size
+	} else {
+		ra.size = -1
+	}
 	return ra, nil
 }
 
@@ -82,7 +98,7 @@ func (ra *S3ReaderAt) Size() (int64, error) {
 // off. It returns the number of bytes read and the error, if any. ReadAt
 // always returns a non-nil error when n < len(b). At end of file, that
 // error is io.EOF. It is safe for concurrent use.
-func (ra *S3ReaderAt) ReadAt(p []byte, off int64) (n int, err error) {
+func (ra *S3ReaderAt) ReadAt(p []byte, off int64) (int, error) {
 	// fmt.Printf("readat off=%d len=%d\n", off, len(p))
 	if len(p) == 0 {
 		return 0, nil
@@ -91,7 +107,7 @@ func (ra *S3ReaderAt) ReadAt(p []byte, off int64) (n int, err error) {
 	reqFirst := off
 	reqLast := off + int64(len(p)) - 1
 
-	_, err = ra.Size()
+	_, err := ra.Size()
 	if err != nil {
 		return 0, err
 	}
@@ -122,7 +138,7 @@ func (ra *S3ReaderAt) ReadAt(p []byte, off int64) (n int, err error) {
 	}
 	defer resp.Body.Close()
 
-	n, err = io.ReadFull(resp.Body, p)
+	n, err := io.ReadFull(resp.Body, p)
 
 	if err == io.ErrUnexpectedEOF {
 		err = io.EOF
