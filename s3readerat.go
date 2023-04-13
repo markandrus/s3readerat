@@ -83,10 +83,12 @@ func NewWithOptions(options Options) (*S3ReaderAt, error) {
 	} else if options.Size != nil && *options.Size < 0 {
 		return nil, errors.Errorf("provided size is invalid: %d", *options.Size)
 	}
+
 	ctx := options.Context
 	if ctx == nil {
 		ctx = context.Background()
 	}
+	
 	ra := &S3ReaderAt{
 		Debug:   options.Debug,
 		ctx:     ctx,
@@ -95,6 +97,7 @@ func NewWithOptions(options Options) (*S3ReaderAt, error) {
 		bucket:  options.Bucket,
 		key:     options.Key,
 	}
+	
 	if options.Size != nil {
 		ra.size = *options.Size
 	} else {
